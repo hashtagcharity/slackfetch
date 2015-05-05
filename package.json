@@ -23,7 +23,7 @@
     "express": "^4.12.3",
     "lodash": "^3.8.0",
     "morgan": "^1.5.2",
-    "redis": "^0.12.1",
-    "slack-node": "^0.1.0"
+    "slack-node": "^0.1.0",
+    "winston": "^1.0.0"
   }
 }
