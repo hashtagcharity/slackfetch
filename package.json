@@ -1,0 +1,28 @@
+{
+  "name": "slackfetch",
+  "version": "1.0.0",
+  "description": "Fetches Slack based on the API token provided and populates the configured database with the data. Fetched data is available via its HTTP interface.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://kieszistvan@github.com/hashtagcharity/slackfetch.git"
+  },
+  "keywords": [
+    "slack"
+  ],
+  "author": "Istvan Kiesz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hashtagcharity/slackfetch/issues"
+  },
+  "homepage": "https://github.com/hashtagcharity/slackfetch",
+  "dependencies": {
+    "express": "^4.12.3",
+    "lodash": "^3.8.0",
+    "redis": "^0.12.1",
+    "slack-node": "^0.1.0"
+  }
+}

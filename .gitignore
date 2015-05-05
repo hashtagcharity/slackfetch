@@ -1,0 +1,30 @@
+## Mac stuff
+.DS_Store
+
+## Libs and Node stuff
+node_modules/
+bower_components/
+*.log
+*.zip
+forever.*
+
+## Sublime stuff
+*.sublime-*
+
+## Visual Studio stuff
+obj
+bin
+*.suo
+.ntvs_analysis.dat
+*.nsproj
+*.sln
+Platform.njsproj
+*.tmp
+
+## Build stuff
+dist/
+*.njsproj
+
+
+test/nightwatch/report
+test/nightwatch/shots
