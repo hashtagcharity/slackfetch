@@ -1,5 +1,15 @@
 var _ = require('lodash');
 var express = require('express');
+var winston = require('winston');
+var morgan = require('morgan');
+
+global.logger = new(winston.Logger)({
+    transports: [
+        new(winston.transports.Console)({
+            timestamp: true
+        })
+    ]
+});
 
 var config = {
     port: process.env.PORT || 3000,
@@ -8,7 +18,7 @@ var config = {
 };
 
 if (!config.slackToken) {
-    console.log('Please set the SLACK_TOKEN environment variable');
+    logger.info('Please set the SLACK_TOKEN environment variable');
     process.exit(0);
 }
 
@@ -21,7 +31,7 @@ function fetchSlackInfo() {
     process.nextTick(function() {
         slackService.fetchUsers(function(err, users) {
             if (err) {
-                console.log(err);
+                logger.info(err);
                 return;
             }
 
@@ -29,7 +39,7 @@ function fetchSlackInfo() {
         });
         slackService.fetchChannels(function(err, channels) {
             if (err) {
-                console.log(err);
+                logger.info(err);
                 return;
             }
 
@@ -43,11 +53,14 @@ function fetchSlackInfo() {
 fetchSlackInfo();
 
 var app = express();
-app.listen(config.port);
+app.listen(config.port, function() {
+    logger.info("App listening on port %d", this.address().port);
+});
+app.use(morgan('common'));
 app.get('/messages/:channelId', function(req, res, next) {
     slackService.fetchChannelMessages(req.params.channelId, function(err, messages) {
         if (err) {
-            console.log(err || data);
+            logger.info(err || data);
             res.status(500).json(err || data);
             return;
         }
