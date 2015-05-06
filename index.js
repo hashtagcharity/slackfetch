@@ -85,9 +85,7 @@ app.get('/api/v1/messages/:channelId', function(req, res, next) {
             return messages;
         }, []);
 
-        res.set({
-            'Content-type': 'application/json'
-        });
+        res.set('Content-type', 'application/json');
         res.json(transformedMessages);
     });
 });
