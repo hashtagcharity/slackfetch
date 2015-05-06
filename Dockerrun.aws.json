@@ -1,0 +1,11 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "istvankiesz/slackfetch",
+    "Update": "true"
+  },
+  "Ports": [{
+    "ContainerPort": "3000"
+  }],
+  "Logging": "/var/log/nginx"
+}

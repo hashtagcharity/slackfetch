@@ -57,7 +57,7 @@ app.listen(config.port, function() {
     logger.info("App listening on port %d", this.address().port);
 });
 app.use(morgan('common'));
-app.get('/messages/:channelId', function(req, res, next) {
+app.get('/api/v1/messages/:channelId', function(req, res, next) {
     slackService.fetchChannelMessages(req.params.channelId, function(err, messages) {
         if (err) {
             logger.info(err || data);
@@ -65,7 +65,7 @@ app.get('/messages/:channelId', function(req, res, next) {
             return;
         }
 
-        var transformecMessages = _.reduce(messages, function(messages, message) {
+        var transformedMessages = _.reduce(messages, function(messages, message) {
             var date = parseFloat(message.ts.split('.').shift()) * 1000;
             messages.push({
                 user: usersMap[message.user],
@@ -76,8 +76,11 @@ app.get('/messages/:channelId', function(req, res, next) {
             return messages;
         }, []);
 
-        res.json(transformecMessages);
+        res.json(transformedMessages);
     });
+});
+app.get('/healthcheck', function(req, res) {
+    res.send('yo');
 });
 
 var userPattern = /<@[a-z0-9]+\|?[a-z0-9]*>/gi;
