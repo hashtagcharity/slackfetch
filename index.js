@@ -57,6 +57,15 @@ app.listen(config.port, function() {
     logger.info("App listening on port %d", this.address().port);
 });
 app.use(morgan('common'));
+app.use(function setNoCacheHeaders(req, res, next) {
+    res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': 0
+    });
+
+    next();
+});
 app.get('/api/v1/messages/:channelId', function(req, res, next) {
     slackService.fetchChannelMessages(req.params.channelId, function(err, messages) {
         if (err) {
@@ -76,6 +85,9 @@ app.get('/api/v1/messages/:channelId', function(req, res, next) {
             return messages;
         }, []);
 
+        res.set({
+            'Content-type': 'application/json'
+        });
         res.json(transformedMessages);
     });
 });
