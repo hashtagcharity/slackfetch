@@ -102,9 +102,9 @@ function replaceSlackMetas(users, channels, message) {
         var user = users[userId];
 
         if (user) {
-            return '@' + (user.firstName || user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
+            return (user.firstName || user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
         } else {
-            return 'Anonymus';
+            return 'Unknown';
         }
     });
 
