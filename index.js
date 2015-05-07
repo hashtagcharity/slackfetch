@@ -12,9 +12,9 @@ global.logger = new(winston.Logger)({
 });
 
 var config = {
-    port: process.env.PORT || 3000,
+    port: process.env.PORT,
     slackToken: process.env.SLACK_TOKEN,
-    fetchInterval: process.env.INTERVAL || 30000
+    fetchInterval: process.env.INTERVAL || 60000
 };
 
 if (!config.slackToken) {
@@ -102,9 +102,9 @@ function replaceSlackMetas(users, channels, message) {
         var user = users[userId];
 
         if (user) {
-            return '@' + (user.firstName || user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
+            return (user.firstName || user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
         } else {
-            return 'Anonymus';
+            return 'Unknown';
         }
     });
 
