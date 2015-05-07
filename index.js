@@ -15,7 +15,7 @@ var logger = new(winston.Logger)({
 var config = {
     port: process.env.PORT,
     slackToken: process.env.SLACK_TOKEN,
-    fetchInterval: process.env.INTERVAL || 60000
+    fetchInterval: process.env.INTERVAL
 };
 
 if (!config.slackToken) {
