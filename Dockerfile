@@ -1,7 +1,8 @@
 FROM node:0.10-wheezy
 
 ENV PORT 3000
-# has to be stated explicitly
+ENV INTERVAL 60000
+
 EXPOSE 3000
 
 ADD . /slackfetch
