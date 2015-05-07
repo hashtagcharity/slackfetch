@@ -1,9 +1,10 @@
 var _ = require('lodash');
+var morgan = require('morgan');
 var express = require('express');
 var winston = require('winston');
-var morgan = require('morgan');
+var Slack = require('slack-node');
 
-global.logger = new(winston.Logger)({
+var logger = new(winston.Logger)({
     transports: [
         new(winston.transports.Console)({
             timestamp: true
@@ -22,29 +23,45 @@ if (!config.slackToken) {
     process.exit(0);
 }
 
-var slackService = require('./lib/slack-service')(config.slackToken);
+var slack = new Slack(config.slackToken);
 
-var usersMap = {};
-var channelsMap = {};
+var usersMap = [];
+var channelsMap = [];
 
 function fetchSlackInfo() {
     process.nextTick(function() {
-        slackService.fetchUsers(function(err, users) {
-            if (err) {
-                logger.info(err);
+        slack.api('users.list', {}, function(err, data) {
+            if (err || !data.ok) {
+                logger.error(err || data);
                 return;
             }
 
-            usersMap = users;
+            logger.info('Fetched %d users', data.members.length);
+
+            data.members.forEach(function(member) {
+                usersMap[member.id] = {
+                    username: member.name,
+                    firstName: member.profile.first_name,
+                    lastName: member.profile.last_name,
+                    pictureUrl: member.profile.image_72
+                };
+            });
         });
-        slackService.fetchChannels(function(err, channels) {
-            if (err) {
-                logger.info(err);
+        slack.api('channels.list', {}, function(err, data) {
+            if (err || !data.ok) {
+                logger.error(err || data);
                 return;
             }
 
-            channelsMap = channels;
+            logger.info('Fetched %d channels', data.channels.length);
+
+            data.channels.forEach(function(channel) {
+                channelsMap[channel.id] = {
+                    name: channel.name
+                };
+            });
         });
+
 
         setTimeout(fetchSlackInfo, config.fetchInterval);
     });
@@ -66,35 +83,42 @@ app.use(function setNoCacheHeaders(req, res, next) {
 
     next();
 });
-app.get('/api/v1/messages/:channelId', function(req, res, next) {
-    slackService.fetchChannelMessages(req.params.channelId, function(err, messages) {
-        if (err) {
-            logger.info(err || data);
-            res.status(500).json(err || data);
-            return;
-        }
 
-        var transformedMessages = _.reduce(messages, function(messages, message) {
-            var date = parseFloat(message.ts.split('.').shift()) * 1000;
-            messages.push({
-                user: usersMap[message.user],
-                text: replaceSlackMetas(usersMap, channelsMap, message.text),
-                date: new Date(date)
-            });
+app.get('/api/v1/messages/:channelId',
+    function(req, res, next) {
+        slack.api('channels.history', {
+            channel: req.params.channelId
+        }, function(err, data) {
+            if (err || !data.ok) {
+                logger.info(err || data);
+                res.status(500).json(err || data);
+                return;
+            }
 
-            return messages;
-        }, []);
+            var transformedMessages = _.reduce(data.messages, function(messages, message) {
+                var date = parseFloat(message.ts.split('.').shift()) * 1000;
+                messages.push({
+                    user: usersMap[message.user],
+                    text: replaceSlackMetas(usersMap, channelsMap, message.text),
+                    date: new Date(date)
+                });
 
-        res.set('Content-type', 'application/json');
-        res.json(transformedMessages);
+                return messages;
+            }, []);
+
+            res.set('Content-type', 'application/json');
+            res.json(transformedMessages);
+        });
     });
-});
-app.get('/healthcheck', function(req, res) {
-    res.send('yo');
-});
+
+app.get('/healthcheck',
+    function(req, res) {
+        res.send('yo');
+    });
 
 var userPattern = /<@[a-z0-9]+\|?[a-z0-9]*>/gi;
 var channelPattern = /<#[a-z0-9]+>/gi;
+
 
 function replaceSlackMetas(users, channels, message) {
     var replacedWithUser = message.replace(userPattern, function(match) {
