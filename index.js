@@ -12,9 +12,9 @@ global.logger = new(winston.Logger)({
 });
 
 var config = {
-    port: process.env.PORT || 3000,
+    port: process.env.PORT,
     slackToken: process.env.SLACK_TOKEN,
-    fetchInterval: process.env.INTERVAL || 30000
+    fetchInterval: process.env.INTERVAL || 60000
 };
 
 if (!config.slackToken) {
