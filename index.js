@@ -155,5 +155,5 @@ function replaceSlackMetas(users, channels, message) {
         return util.format('<a href="%s" target="_blank">%s</a>', href, label);
     });
 
-    return replacedWithChannel;
+    return replacedWithAnchors;
 }
