@@ -1,8 +1,10 @@
 var _ = require('lodash');
+var evcheck = require('evcheck');
 var morgan = require('morgan');
 var express = require('express');
 var winston = require('winston');
 var Slack = require('slack-node');
+var util = require('util');
 
 var logger = new(winston.Logger)({
     transports: [
@@ -18,10 +20,12 @@ var config = {
     fetchInterval: process.env.INTERVAL
 };
 
-if (!config.slackToken) {
-    logger.info('Please set the SLACK_TOKEN environment variable');
-    process.exit(0);
-}
+evcheck.checkVars(['PORT', 'INTERVAL', 'SLACK_TOKEN'], function(err) {
+    if (err) {
+        console.log(err.message);
+        process.exit(9);
+    }
+});
 
 var slack = new Slack(config.slackToken);
 
@@ -118,7 +122,7 @@ app.get('/healthcheck',
 
 var userPattern = /<@[a-z0-9]+\|?[a-z0-9]*>/gi;
 var channelPattern = /<#[a-z0-9]+>/gi;
-
+var hrefPattern = /<https?[^>]*>/gi;
 
 function replaceSlackMetas(users, channels, message) {
     var replacedWithUser = message.replace(userPattern, function(match) {
@@ -126,7 +130,7 @@ function replaceSlackMetas(users, channels, message) {
         var user = users[userId];
 
         if (user) {
-            return (user.firstName || user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
+            return (user.firstName && user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
         } else {
             return 'Unknown';
         }
@@ -141,6 +145,14 @@ function replaceSlackMetas(users, channels, message) {
         } else {
             return '#Unknown';
         }
+    });
+
+    var replacedWithAnchors = replacedWithUser.replace(hrefPattern, function(match) {
+        var ref = match.slice(1, match.indexOf('>'));
+        var href = ref.slice(0, ref.indexOf('|'));
+        var label = ref.slice(ref.indexOf('|') + 1, ref.lenth) || href;
+
+        return util.format('<a href="%s" target="_blank">%s</a>', href, label);
     });
 
     return replacedWithChannel;
