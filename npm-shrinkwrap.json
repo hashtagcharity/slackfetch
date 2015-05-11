@@ -2,6 +2,10 @@
   "name": "slackfetch",
   "version": "1.0.0",
   "dependencies": {
+    "evcheck": {
+      "version": "0.0.3",
+      "from": "evcheck@*"
+    },
     "express": {
       "version": "4.12.3",
       "from": "express@>=4.12.3 <5.0.0",
