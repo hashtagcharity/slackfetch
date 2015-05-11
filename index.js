@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var evcheck = require('evcheck');
 var morgan = require('morgan');
 var express = require('express');
 var winston = require('winston');
@@ -18,10 +19,12 @@ var config = {
     fetchInterval: process.env.INTERVAL
 };
 
-if (!config.slackToken) {
-    logger.info('Please set the SLACK_TOKEN environment variable');
-    process.exit(0);
-}
+evcheck.checkVars(['PORT', 'INTERVAL', 'SLACK_TOKEN'], function(err) {
+    if (err) {
+        console.log(err.message);
+        process.exit(9);
+    }
+});
 
 var slack = new Slack(config.slackToken);
 
