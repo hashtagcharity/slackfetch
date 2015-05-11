@@ -130,9 +130,9 @@ function replaceSlackMetas(users, channels, message) {
         var user = users[userId];
 
         if (user) {
-            return (user.firstName && user.lastName) ? user.firstName + ' ' + user.lastName : user.username;
+            return '@' + user.username;
         } else {
-            return 'Unknown';
+            return '@unknown';
         }
     });
 
@@ -143,11 +143,11 @@ function replaceSlackMetas(users, channels, message) {
         if (channel) {
             return '#' + channel.name;
         } else {
-            return '#Unknown';
+            return '#unknown';
         }
     });
 
-    var replacedWithAnchors = replacedWithUser.replace(hrefPattern, function(match) {
+    var replacedWithAnchors = replacedWithChannel.replace(hrefPattern, function(match) {
         var ref = match.slice(1, match.indexOf('>'));
         var href = ref.slice(0, ref.indexOf('|'));
         var label = ref.slice(ref.indexOf('|') + 1, ref.lenth) || href;
