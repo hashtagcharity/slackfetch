@@ -7,8 +7,9 @@ EXPOSE 3000
 
 ADD . /slackfetch
 
-# RUN apt-get update -y
-RUN cd /slackfetch && npm install
+WORKDIR /slackfetch
+
+RUN npm install
 
 WORKDIR /slackfetch
 
