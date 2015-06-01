@@ -4,7 +4,7 @@ var morgan = require('morgan');
 var express = require('express');
 var winston = require('winston');
 var Slack = require('slack-node');
-var util = require('util');
+var metaReplacer = require('./lib/meta-replacer');
 
 var logger = new(winston.Logger)({
     transports: [
@@ -101,9 +101,11 @@ app.get('/api/v1/messages/:channelId',
 
             var transformedMessages = _.reduce(data.messages, function(messages, message) {
                 var date = parseFloat(message.ts.split('.').shift()) * 1000;
+                var replacedMessage = metaReplacer(usersMap, channelsMap, message);
+
                 messages.push({
                     user: usersMap[message.user],
-                    text: replaceSlackMetas(usersMap, channelsMap, message.text),
+                    text: replacedMessage,
                     date: new Date(date)
                 });
 
@@ -119,41 +121,3 @@ app.get('/healthcheck',
     function(req, res) {
         res.send('yo');
     });
-
-var userPattern = /<@[a-z0-9]+\|?[a-z0-9]*>/gi;
-var channelPattern = /<#[a-z0-9]+>/gi;
-var hrefPattern = /<https?[^>]*>/gi;
-
-function replaceSlackMetas(users, channels, message) {
-    var replacedWithUser = message.replace(userPattern, function(match) {
-        var userId = match.slice(2, match.indexOf('|'));
-        var user = users[userId];
-
-        if (user) {
-            return '@' + user.username;
-        } else {
-            return '@unknown';
-        }
-    });
-
-    var replacedWithChannel = replacedWithUser.replace(channelPattern, function(match) {
-        var channelId = match.slice(2, match.indexOf('>'));
-        var channel = channels[channelId];
-
-        if (channel) {
-            return '#' + channel.name;
-        } else {
-            return '#unknown';
-        }
-    });
-
-    var replacedWithAnchors = replacedWithChannel.replace(hrefPattern, function(match) {
-        var ref = match.slice(1, match.indexOf('>'));
-        var href = ref.slice(0, ref.indexOf('|'));
-        var label = ref.slice(ref.indexOf('|') + 1, ref.lenth) || href;
-
-        return util.format('<a href="%s" target="_blank">%s</a>', href, label);
-    });
-
-    return replacedWithAnchors;
-}
