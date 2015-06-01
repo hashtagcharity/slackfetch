@@ -4,6 +4,7 @@
   "description": "Fetches Slack based on the API token provided and populates the configured database with the data. Fetched data is available via its HTTP interface.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "node_modules/.bin/mocha test/test.js"
   },
   "repository": {
