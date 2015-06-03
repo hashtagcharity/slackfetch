@@ -1,12 +1,5 @@
 var should = require('should');
-var stream = require('stream');
-var Readable = stream.Readable;
-var Writable = stream.Writable;
-
 var metaReplacer = require('../lib/meta-replacer');
-var userTransformer = require('../lib/user-transformer');
-var channelTransformer = require('../lib/channel-transformer');
-var anchorTransformer = require('../lib/anchor-transformer');
 
 describe('userTransformer', function() {
 

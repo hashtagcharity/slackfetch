@@ -101,13 +101,15 @@ app.get('/api/v1/messages/:channelId',
 
             var transformedMessages = _.reduce(data.messages, function(messages, message) {
                 var date = parseFloat(message.ts.split('.').shift()) * 1000;
-                var replacedMessage = metaReplacer(usersMap, channelsMap, message);
 
-                messages.push({
-                    user: usersMap[message.user],
-                    text: replacedMessage,
-                    date: new Date(date)
-                });
+                if (message.type === 'message') {
+                    var replacedMessage = metaReplacer(usersMap, channelsMap, message.text);
+                    messages.push({
+                        user: usersMap[message.user],
+                        text: replacedMessage,
+                        date: new Date(date)
+                    });
+                }
 
                 return messages;
             }, []);
