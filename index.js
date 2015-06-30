@@ -192,7 +192,6 @@ app.get('/api/:team/:channelId/messages',
                     var teamInfo = ids[channelId];
                     logger.info('Channel resolved to %s', JSON.parse(teamInfo).name);
 
-                    logger.info(data.messages)
                     var transformedMessages = _.reduce(data.messages, function(messages, message) {
                         var date = parseFloat(message.ts.split('.').shift()) * 1000;
 
